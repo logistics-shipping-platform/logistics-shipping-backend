@@ -24,7 +24,7 @@ export class AuthenticateUserUseCase implements AuthenticateUserPort {
     const valid = await user.verifyPassword(password, this.hasher);
     if (!valid) throw new Error('Credenciales inválidas');
 
-    const token = await this.tokenSvc.generate({ sub: user.id, email: user.email });
+    const token = await this.tokenSvc.generate({ userId: user.id, email: user.email });
     return { token };
   }
 }
