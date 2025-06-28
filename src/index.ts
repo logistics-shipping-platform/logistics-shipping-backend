@@ -2,15 +2,17 @@ import 'dotenv/config';
 import express from 'express';
 
 import { MySQLUserRepo } from './adapter/outbound/persistence/MysqlUserRepo';
-import { 
-  BcryptHasher, 
-  JWTService 
+import {
+  BcryptHasher,
+  JWTService
 } from './adapter/outbound/auth';
-import { 
-  AuthenticateUserUseCase
- } from './application/usecase';
-import { 
-  AuthController 
+import {
+  AuthenticateUserUseCase,
+  RegisterUserUseCase
+} from './application/usecase';
+import {
+  AuthController,
+  UserController
 } from './adapter/inbound/http';
 
 async function main() {
@@ -20,15 +22,18 @@ async function main() {
 
   // Adapters outbound
   const userRepo = new MySQLUserRepo();
-  const hasher   = new BcryptHasher();
-  const jwtSvc   = new JWTService();
+  const hasher = new BcryptHasher();
+  const jwtSvc = new JWTService();
 
   // Use case
   const authenticateUserUC = new AuthenticateUserUseCase(userRepo, hasher, jwtSvc);
+  const registerUC = new RegisterUserUseCase(userRepo, hasher);
 
   // Controllers
-  const authController = new AuthController(authenticateUserUC);
-  app.post('/auth', authController.login);
+  const authCtrl = new AuthController(authenticateUserUC);
+  const userCtrl = new UserController(registerUC);
+  app.post('/auth', authCtrl.login);
+  app.post('/user', userCtrl.register);
 
   app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
