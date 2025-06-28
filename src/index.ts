@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import express from 'express';
+import { pool } from './config/MysqlDatabase';
 
 import { MySQLUserRepo } from './adapter/outbound/persistence/MysqlUserRepo';
 import {
@@ -17,7 +18,7 @@ import {
 
 async function main() {
   const app = express();
-  const port = process.env.PORT || 3000;
+  const port = process.env.API_GATEWAY_PORT || 3000;
   app.use(express.json());
 
   // Adapters outbound

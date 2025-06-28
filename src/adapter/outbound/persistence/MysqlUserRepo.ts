@@ -3,29 +3,9 @@ import {
     DocType,
     User
 } from '../../../domain/model/user';
-
-interface RawUser {
-    documentType: DocType;
-    document: string;
-    createdAt: Date;
-    fullName: string;
-    id: string;
-    email: string;
-    passwordHash: string;
-}
+import { pool } from '../../../config/MysqlDatabase';
 
 export class MySQLUserRepo implements UserRepositoryPort {
-    private readonly users: RawUser[] = [
-        {
-            id: '1',
-            email: 'danieltu1026@gmail.com',
-            passwordHash: '$2b$10$nSYNpFAV9OYdlVl3hr6u7uThvC04pNEhUdFA4uu7q8hHT4uI2IGbO',
-            fullName: 'Daniel Tobon',
-            documentType: DocType.CC,
-            document: '1026267890',
-            createdAt: new Date()
-        }
-    ];
 
     /**
      * Busca un usuario por su email.
@@ -33,17 +13,28 @@ export class MySQLUserRepo implements UserRepositoryPort {
      * @returns Una promesa que resuelve en el usuario encontrado o null si no existe.
      */
     async findByEmail(email: string): Promise<User | null> {
-        const row = this.users.find(u => u.email === email.toLowerCase().trim());
-        if (!row) return null;
+
+        const sql = `
+            SELECT * 
+            FROM users 
+            WHERE email = ?
+            LIMIT 1
+        `;
+        const [rows] = await pool.query<any[]>(sql, [
+            email.toLowerCase()
+        ]);
+        if (rows.length === 0) return null;
+        
+        const row = rows[0];
 
         return new User({
             id: row.id,
             email: row.email,
-            passwordHash: row.passwordHash,
-            fullName: row.fullName,
-            documentType: row.documentType,
+            passwordHash: row.password_hash,
+            fullName: row.full_name,
+            documentType: row.document_type,
             document: row.document,
-            createdAt: row.createdAt
+            createdAt: row.created_at
         });
     }
 
@@ -53,15 +44,20 @@ export class MySQLUserRepo implements UserRepositoryPort {
      * @returns Una promesa que se resuelve cuando el usuario ha sido guardado.
      */
     async save(user: User): Promise<void> {
-        this.users.push({
-            id: user.id,
-            email: user.email,
-            passwordHash: user.getPasswordHash(),
-            fullName: user.fullName,
-            documentType: user.documentType,
-            document: user.document,
-            createdAt: user.createdAt
-        });
+        const sql = `
+            INSERT INTO users 
+                (id, email, password_hash, full_name, document_type, document)
+            VALUES (?, ?, ?, ?, ?, ?)
+            `;
+
+        await pool.execute(sql, [
+            user.id,
+            user.email,
+            user.getPasswordHash(),
+            user.fullName,
+            user.documentType,
+            user.document
+        ]);
     }
     /**
      * Busca un usuario por su email o documento.
@@ -70,22 +66,28 @@ export class MySQLUserRepo implements UserRepositoryPort {
      * @returns Una promesa que resuelve en el usuario encontrado o null si no existe.
      */
     async findByEmailOrDocument(email: string, document: string): Promise<User | null> {
-        const lowerEmail = email.toLowerCase();
-        const docTrimmed = document.trim().toLowerCase();
-        const foundUser = (
-            this.users.find(u =>
-                u.email === lowerEmail ||
-                u.document.toLowerCase() === docTrimmed
-            ) ?? null
-        );
+        const sql = `
+            SELECT * 
+            FROM users 
+            WHERE email = ?
+                OR document = ?
+            LIMIT 1
+        `;
+        const [rows] = await pool.query<any[]>(sql, [
+            email.toLowerCase(),
+            document.trim(),
+        ]);
+        if (rows.length === 0) return null;
+
+        const foundUser = rows[0];
         return foundUser ? new User({
             id: foundUser.id,
             email: foundUser.email,
-            passwordHash: foundUser.passwordHash,
-            fullName: foundUser.fullName,
-            documentType: foundUser.documentType,
+            passwordHash: foundUser.password_hash,
+            fullName: foundUser.full_name,
+            documentType: foundUser.document_type,
             document: foundUser.document,
-            createdAt: foundUser.createdAt
+            createdAt: foundUser.created_at
         }) : null;
     }
 }
