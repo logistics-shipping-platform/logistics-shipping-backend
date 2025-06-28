@@ -97,6 +97,24 @@ describe('UserController (integración)', () => {
             });
     });
 
+    it('POST /user → 400 y mensaje de error si el nombre supera los caracteres permitidos', async () => {
+        const fakeUC = { execute: jest.fn() };
+        app = buildApp(fakeUC);
+
+        await request(app)
+            .post('/user')
+            .send({
+                email: 'a@b.com',
+                password: 'longenoughpassword',
+                fullName: 'a'.repeat(256),
+            })
+            .expect(400)
+            .expect(res => {
+                expect(res.body).toHaveProperty('error');
+                expect(fakeUC.execute).not.toHaveBeenCalled();
+            });
+    });
+
     it('POST /user → 400 y mensaje de error si falta el tipo de documento', async () => {
         const fakeUC = { execute: jest.fn() };
         app = buildApp(fakeUC);
@@ -115,7 +133,7 @@ describe('UserController (integración)', () => {
             });
     });
 
-    it('POST /user → 400 y mensaje de error si falta el documento', async () => {
+    it('POST /user → 400 y mensaje de error si el documento supera los caracteres permitidos', async () => {
         const fakeUC = { execute: jest.fn() };
         app = buildApp(fakeUC);
 
@@ -125,7 +143,27 @@ describe('UserController (integración)', () => {
                 email: 'a@b.com',
                 password: 'longenoughpassword',
                 fullName: 'Nombre Completo',
-                documentType: 'CC',
+                documentType: DocType.CC,
+                document: 'a'.repeat(51)
+            })
+            .expect(400)
+            .expect(res => {
+                expect(res.body).toHaveProperty('error');
+                expect(fakeUC.execute).not.toHaveBeenCalled();
+            });
+    });
+
+    it('POST /user → 400 y mensaje de error si falta el tipo de documento', async () => {
+        const fakeUC = { execute: jest.fn() };
+        app = buildApp(fakeUC);
+
+        await request(app)
+            .post('/user')
+            .send({
+                email: 'a@b.com',
+                password: 'longenoughpassword',
+                fullName: 'Nombre Completo',
+                document: '12345678'
             })
             .expect(400)
             .expect(res => {

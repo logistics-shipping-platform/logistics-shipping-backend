@@ -21,7 +21,6 @@ export class AuthenticateUserUseCase implements AuthenticateUserPort {
   async execute({ email, password }: { email: string; password: string }) {
     const user = await this.users.findByEmail(email);
     if (!user) throw new Error('Credenciales inválidas');
-
     const valid = await user.verifyPassword(password, this.hasher);
     if (!valid) throw new Error('Credenciales inválidas');
 

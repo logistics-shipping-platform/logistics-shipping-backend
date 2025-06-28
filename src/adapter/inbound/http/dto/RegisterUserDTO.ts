@@ -11,7 +11,7 @@ export class RegisterUserDTO {
     const { email, password, fullName, documentType, document } = data;
 
     const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (typeof email !== 'string' || !EMAIL_REGEX.test(email)) {
+    if ((typeof email !== 'string' || !EMAIL_REGEX.test(email) || email.length > 255)) {
       throw new Error('Email inválido');
     }
 
@@ -22,12 +22,20 @@ export class RegisterUserDTO {
     if (typeof fullName !== 'string' || fullName.trim() === '') {
       throw new Error('fullName es obligatorio');
     }
-    if (typeof documentType !== 'string' || documentType.trim() === '') {
-      throw new Error('documentType es obligatorio');
+    if (fullName.length > 255) {
+      throw new Error('fullName no puede tener más de 255 caracteres');
     }
     if (typeof document !== 'string' || document.trim() === '') {
       throw new Error('document es obligatorio');
     }
+    if (document.length > 50) {
+      throw new Error('document no puede tener más de 50 caracteres');
+    }
+
+    if (typeof documentType !== 'string' || documentType.trim() === '') {
+      throw new Error('documentType es obligatorio');
+    }
+
     if (!Object.values(DocType).includes(data.documentType)) {
       throw new Error(
         `documentType inválido. Debe ser uno de: ${Object.values(DocType).join(', ')}`
