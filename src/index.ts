@@ -16,6 +16,7 @@ import {
 import {
   AuthController,
   CityController,
+  CreateShipmentController,
   ParcelController,
   UserController
 } from './adapter/inbound/http';
@@ -24,6 +25,8 @@ import jwt from 'jsonwebtoken';
 import { MySQLCityRepository, MySQLUserRepo } from './adapter/outbound/persistence';
 import { FareService } from './domain/service/FareService';
 import { MySQLFareRepository } from './adapter/outbound/persistence/MySQLFareRepository';
+import { CreateShipmentUseCase } from './application/usecase/shipment/CreateShipmentUseCase';
+import { MYSQLShipmentRepository } from './adapter/outbound/persistence/MYSQLShipmentRepository';
 
 const secret = process.env.JWT_SECRET!;
 
@@ -55,8 +58,8 @@ async function main() {
       } else {
         const token = authHeader.split(' ')[1];
         try {
-          const decoded = jwt.verify(token, secret) as { id: string, email: string };
-          req.user = { id: decoded.id, email: decoded.email };
+          const decoded = jwt.verify(token, secret) as { userId: string, email: string };
+          req.user = { id: decoded.userId, email: decoded.email };
           next();
         } catch {
           res.status(401).json({ error: 'Invalid token' });
@@ -72,6 +75,7 @@ async function main() {
   const userRepo = new MySQLUserRepo();
   const cityRepo = new MySQLCityRepository(pool);
   const fareRepo = new MySQLFareRepository(pool);
+  const shipmentRepo = new MYSQLShipmentRepository(pool);
   const hasher = new BcryptHasher();
   const jwtSvc = new JWTService();
 
@@ -84,16 +88,19 @@ async function main() {
   const registerUC = new RegisterUserUseCase(userRepo, hasher);
   const getParcelQuoteUC = new GetParcelQuoteUseCase(parcelService);
   const getAllCitiesUC = new GetAllCitiesUseCase(cityRepo);
+  const createShipmentUC = new CreateShipmentUseCase(shipmentRepo);
 
   // Controllers
   const authCtrl = new AuthController(authenticateUserUC);
   const userCtrl = new UserController(registerUC);
   const parcelCtrl = new ParcelController(getParcelQuoteUC);
   const cityCtrl = new CityController(getAllCitiesUC);
+  const createShipmentCtrl = new CreateShipmentController(createShipmentUC);
 
   app.post('/api/auth/login', authCtrl.login);
   app.post('/api/auth/register', userCtrl.register);
   app.post('/api/parcels/quote', parcelCtrl.getFareValue);
+  app.post('/api/shipments', createShipmentCtrl.createShipment);
   app.get('/api/cities', cityCtrl.getAllCities);
 
   const server = app.listen(port, () => {
