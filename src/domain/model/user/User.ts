@@ -14,13 +14,13 @@ export interface UserProps {
 
 export class User {
 
-  public readonly id: string;
-  public readonly email: string;
+  private readonly id: string;
+  private readonly email: string;
   private passwordHash: string;
-  public readonly fullName: string;
-  public readonly createdAt: Date;
-  public readonly documentType: DocType;
-  public readonly document: string;
+  private readonly fullName: string;
+  private readonly createdAt: Date;
+  private readonly documentType: DocType;
+  private readonly document: string;
 
   constructor(props: UserProps) {
     this.id = props.id ?? uuid();
@@ -30,6 +30,30 @@ export class User {
     this.documentType = props.documentType;
     this.document = props.document;
     this.createdAt = props.createdAt ?? new Date();
+  }
+
+  getId(): string {
+    return this.id;
+  }
+
+  getEmail(): string {
+    return this.email;
+  }
+
+  getFullName(): string {
+    return this.fullName;
+  }
+
+  getDocumentType(): DocType {
+    return this.documentType;
+  }
+
+  getDocument(): string {
+    return this.document;
+  }
+
+  getCreatedAt(): Date {
+    return this.createdAt;
   }
 
   /**

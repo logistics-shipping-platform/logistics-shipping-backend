@@ -12,7 +12,7 @@ describe('UserController (integración)', () => {
         const server = express();
         server.use(express.json());
 
-        server.post('/user', (req, res, next) =>
+        server.post('/api/auth/register', (req, res, next) =>
             ctrl.register(req, res).catch(next)
         );
         return server;
@@ -25,7 +25,7 @@ describe('UserController (integración)', () => {
         app = buildApp(fakeUC);
 
         await request(app)
-            .post('/user')
+            .post('/api/auth/register')
             .send({
                 email: 'new@user.com',
                 password: 'mypassword',
@@ -51,7 +51,7 @@ describe('UserController (integración)', () => {
         app = buildApp(fakeUC);
 
         await request(app)
-            .post('/user')
+            .post('/api/auth/register')
             .send({
                 email: 'bademail',
                 password: 'short',
@@ -68,7 +68,7 @@ describe('UserController (integración)', () => {
         app = buildApp(fakeUC);
 
         await request(app)
-            .post('/user')
+            .post('/api/auth/register')
             .send({
                 email: 'a@b.com',
                 password: 'short',
@@ -85,7 +85,7 @@ describe('UserController (integración)', () => {
         app = buildApp(fakeUC);
 
         await request(app)
-            .post('/user')
+            .post('/api/auth/register')
             .send({
                 email: 'a@b.com',
                 password: 'longenoughpassword',
@@ -102,7 +102,7 @@ describe('UserController (integración)', () => {
         app = buildApp(fakeUC);
 
         await request(app)
-            .post('/user')
+            .post('/api/auth/register')
             .send({
                 email: 'a@b.com',
                 password: 'longenoughpassword',
@@ -120,7 +120,7 @@ describe('UserController (integración)', () => {
         app = buildApp(fakeUC);
 
         await request(app)
-            .post('/user')
+            .post('/api/auth/register')
             .send({
                 email: 'a@b.com',
                 password: 'longenoughpassword',
@@ -138,7 +138,7 @@ describe('UserController (integración)', () => {
         app = buildApp(fakeUC);
 
         await request(app)
-            .post('/user')
+            .post('/api/auth/register')
             .send({
                 email: 'a@b.com',
                 password: 'longenoughpassword',
@@ -158,7 +158,7 @@ describe('UserController (integración)', () => {
         app = buildApp(fakeUC);
 
         await request(app)
-            .post('/user')
+            .post('/api/auth/register')
             .send({
                 email: 'a@b.com',
                 password: 'longenoughpassword',
@@ -177,7 +177,7 @@ describe('UserController (integración)', () => {
         app = buildApp(fakeUC);
 
         await request(app)
-            .post('/user')
+            .post('/api/auth/register')
             .send({
                 email: 'a@b.com',
                 password: 'longenoughpassword',
@@ -199,7 +199,7 @@ describe('UserController (integración)', () => {
         app = buildApp(fakeUC);
 
         await request(app)
-            .post('/user')
+            .post('/api/auth/register')
             .send({
                 email: 'dup@user.com',
                 password: 'validPass1',

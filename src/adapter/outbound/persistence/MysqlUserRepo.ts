@@ -25,16 +25,16 @@ export class MySQLUserRepo implements UserRepositoryPort {
         ]);
         if (rows.length === 0) return null;
         
-        const row = rows[0];
+        const foundUser = rows[0];
 
         return new User({
-            id: row.id,
-            email: row.email,
-            passwordHash: row.password_hash,
-            fullName: row.full_name,
-            documentType: row.document_type,
-            document: row.document,
-            createdAt: row.created_at
+            id: foundUser.id,
+            email: foundUser.email,
+            passwordHash: foundUser.password_hash,
+            fullName: foundUser.full_name,
+            documentType: foundUser.document_type,
+            document: foundUser.document,
+            createdAt: foundUser.created_at
         });
     }
 
@@ -51,12 +51,12 @@ export class MySQLUserRepo implements UserRepositoryPort {
             `;
 
         await pool.execute(sql, [
-            user.id,
-            user.email,
+            user.getId(),
+            user.getEmail(),
             user.getPasswordHash(),
-            user.fullName,
-            user.documentType,
-            user.document
+            user.getFullName(),
+            user.getDocumentType(),
+            user.getDocument()
         ]);
     }
     /**
@@ -73,6 +73,7 @@ export class MySQLUserRepo implements UserRepositoryPort {
                 OR document = ?
             LIMIT 1
         `;
+
         const [rows] = await pool.query<any[]>(sql, [
             email.toLowerCase(),
             document.trim(),
