@@ -10,9 +10,8 @@ describe('AuthController (integración)', () => {
     const ctrl = new AuthController(useCase as any);
     const server = express();
     server.use(express.json());
-    // Enrutamos /auth/login al método login
     server.post(
-      '/auth/login',
+      '/api/auth/login',
       (req, res, next) => ctrl.login(req, res).catch(next)
     );
     return server;
@@ -25,7 +24,7 @@ describe('AuthController (integración)', () => {
     app = buildApp(fakeUC);
 
     await request(app)
-      .post('/auth/login')
+      .post('/api/auth/login')
       .send({ email: 'u@d.com', password: 'validPass1' })
       .expect(200)
       .expect(res => {
@@ -44,7 +43,7 @@ describe('AuthController (integración)', () => {
     app = buildApp(fakeUC);
 
     await request(app)
-      .post('/auth/login')
+      .post('/api/auth/login')
       .send({ email: 'u@d.com', password: 'wrongPass' })
       .expect(401)
       .expect(res => {
@@ -59,7 +58,7 @@ describe('AuthController (integración)', () => {
     app = buildApp(fakeUC);
 
     await request(app)
-      .post('/auth/login')
+      .post('/api/auth/login')
       .send({ email: 'u@d.com', password: 'whatever' })
       .expect(401)
       .expect(res => {

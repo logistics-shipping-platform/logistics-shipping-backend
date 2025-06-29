@@ -22,12 +22,15 @@ export class RegisterUserDTO {
     if (typeof fullName !== 'string' || fullName.trim() === '') {
       throw new Error('fullName es obligatorio');
     }
+
     if (fullName.length > 255) {
       throw new Error('fullName no puede tener más de 255 caracteres');
     }
+
     if (typeof document !== 'string' || document.trim() === '') {
       throw new Error('document es obligatorio');
     }
+    
     if (document.length > 50) {
       throw new Error('document no puede tener más de 50 caracteres');
     }

@@ -31,6 +31,6 @@ describe('AuthenticateUserUseCase', () => {
     fakeUser.verifyPassword.mockResolvedValue(true);
     const result = await uc.execute({ email: 'x', password: 'y' });
     expect(result).toEqual({ token: 'tok' });
-    expect(tokenSvc.generate).toHaveBeenCalledWith({ sub: '1', email: 'a@b.com' });
+    expect(tokenSvc.generate).toHaveBeenCalledWith({ userId: '1', email: 'a@b.com' });
   });
 });

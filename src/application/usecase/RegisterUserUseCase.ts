@@ -7,7 +7,7 @@ export class RegisterUserUseCase implements RegisterUserPort {
   constructor(
     private users: UserRepositoryPort,
     private hasher: PasswordHasherPort
-  ) {}
+  ) { }
 
   /**
    * Registra un nuevo usuario en el sistema.
@@ -33,21 +33,24 @@ export class RegisterUserUseCase implements RegisterUserPort {
   }): Promise<{ userId: string }> {
 
 
-     const existing = await this.users.findByEmailOrDocument(
+    const userExisting = await this.users.findByEmailOrDocument(
       email,
       document.trim()
     );
-    if (existing) {
-      if (existing.email === email) {
+
+    // Verifica si ya existe un usuario con el mismo email o documento
+    if (userExisting) {
+      if (userExisting.getEmail() === email) {
         throw new Error('Ya existe un usuario con el correo ingresado');
       }
       throw new Error('Ya existe un usuario con el documento ingresado');
     }
+
+    // Si es un usuario nuevo, se crea un nuevo objeto User
     const hash = await this.hasher.hash(password);
     const user = User.create({ email: email, passwordHash: hash, fullName, documentType, document });
-
     await this.users.save(user);
 
-    return { userId: user.id };
+    return { userId: user.getId() };
   }
 }
