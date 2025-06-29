@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
-import { RegisterUserUseCase } from '../../../application/usecase/RegisterUserUseCase';
+
 import { RegisterUserDTO } from './dto/RegisterUserDTO';
+import { RegisterUserUseCase } from '../../../application/usecase';
 
 export class UserController {
   constructor(private registerUC: RegisterUserUseCase) { }

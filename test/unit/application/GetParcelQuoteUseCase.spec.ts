@@ -16,21 +16,21 @@ describe('GetParcelQuoteUseCase', () => {
   };
 
   beforeEach(() => {
-    parcelService = { getQuote: jest.fn() } as any;
+    parcelService = { getFareValue: jest.fn() } as any;
     useCase = new GetParcelQuoteUseCase(parcelService);
   });
 
-  it('should call parcelService.getQuote with correct params and return the parcel', async () => {
+  it('Realiza correctamente el calculo de tarifas', async () => {
     const mockParcel = new Parcel(5, 10, 10, 10);
     mockParcel.setChargeableWeight(mockParcel.calculateChargeableWeight(mockParcel));
     mockParcel.setPrice(100);
 
-    parcelService.getQuote.mockResolvedValue(mockParcel);
+    parcelService.getFareValue.mockResolvedValue(mockParcel);
 
     const result = await useCase.execute(dto);
     expect(mockParcel.getPrice()).toBe(100);
     expect(mockParcel.getChargeableWeight()).toBe(mockParcel.calculateChargeableWeight(mockParcel));
-    expect(parcelService.getQuote).toHaveBeenCalledWith(
+    expect(parcelService.getFareValue).toHaveBeenCalledWith(
       dto.originId,
       dto.destinationId,
       dto.weight,

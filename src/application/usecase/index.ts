@@ -1,3 +1,4 @@
-export * from './AuthenticateUserUseCase';
-export * from './GetParcelQuoteUseCase';
-export * from './RegisterUserUseCase';
+export * from './auth/AuthenticateUserUseCase';
+export * from './auth/RegisterUserUseCase';
+export * from './city/GetAllCitiesUseCase';
+export * from './parcel/GetParcelQuoteUseCase';

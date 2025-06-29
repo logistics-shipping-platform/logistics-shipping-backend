@@ -1,5 +1,6 @@
-import { ParcelQuoteDTO } from "../../adapter/inbound/http";
-import { ParcelService } from "../../domain/service/ParcelService";
+import { ParcelQuoteDTO } from "../../../adapter/inbound/http";
+import { ParcelService } from "../../../domain/service/ParcelService";
+
 
 export class GetParcelQuoteUseCase {
   constructor(private parcelService: ParcelService) {}

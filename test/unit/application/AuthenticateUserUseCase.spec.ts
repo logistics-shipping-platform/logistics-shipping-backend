@@ -5,7 +5,9 @@ describe('AuthenticateUserUseCase', () => {
     id: '1', 
     email: 'a@b.com', 
     passwordHash: 'hash',
-    verifyPassword: jest.fn()
+    verifyPassword: jest.fn(),
+    getId: jest.fn().mockReturnValue('1'),
+    getEmail: jest.fn().mockReturnValue('a@b.com')
   };
   const userRepo = { findByEmail: jest.fn()};
   const hasher   = { compare: jest.fn() };
@@ -29,6 +31,8 @@ describe('AuthenticateUserUseCase', () => {
   it('devuelve token si todo OK', async () => {
     userRepo.findByEmail.mockResolvedValue(fakeUser);
     fakeUser.verifyPassword.mockResolvedValue(true);
+    fakeUser.getId.mockReturnValue('1');
+    fakeUser.getEmail.mockReturnValue('a@b.com');
     const result = await uc.execute({ email: 'x', password: 'y' });
     expect(result).toEqual({ token: 'tok' });
     expect(tokenSvc.generate).toHaveBeenCalledWith({ userId: '1', email: 'a@b.com' });
