@@ -1,6 +1,6 @@
 export * from './AuthController';
 export * from './CityController';
-export * from './CreateShipmentController';
+export * from './ShipmentController';
 export * from './ParcelController';
 export * from './UserController';
 export * from './dto/CreateShipmentDTO';
