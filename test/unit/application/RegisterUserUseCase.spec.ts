@@ -1,4 +1,4 @@
-import { RegisterUserUseCase } from '../../../src/application/usecase/RegisterUserUseCase';
+import { RegisterUserUseCase } from '../../../src/application/usecase';
 import { DocType, User } from '../../../src/domain/model/user';
 
 describe('RegisterUserUseCase', () => {
@@ -71,11 +71,11 @@ describe('RegisterUserUseCase', () => {
         expect(userRepo.save).toHaveBeenCalledTimes(1);
 
         const savedUser = userRepo.save.mock.calls[0][0] as User;
-        expect(savedUser.email).toBe(validDto.email);
-        expect(savedUser.fullName).toBe(validDto.fullName);
-        expect(savedUser.documentType).toBe(validDto.documentType);
-        expect(savedUser.document).toBe(validDto.document);
+        expect(savedUser.getEmail()).toBe(validDto.email);
+        expect(savedUser.getFullName()).toBe(validDto.fullName);
+        expect(savedUser.getDocumentType()).toBe(validDto.documentType);
+        expect(savedUser.getDocument()).toBe(validDto.document);
 
-        expect(result).toHaveProperty('userId', savedUser.id);
+        expect(result).toHaveProperty('userId', savedUser.getId());
     });
 });

@@ -9,11 +9,13 @@ import {
 } from './adapter/outbound/auth';
 import {
   AuthenticateUserUseCase,
+  GetAllCitiesUseCase,
   GetParcelQuoteUseCase,
   RegisterUserUseCase
 } from './application/usecase';
 import {
   AuthController,
+  CityController,
   ParcelController,
   UserController
 } from './adapter/inbound/http';
@@ -73,21 +75,26 @@ async function main() {
   const hasher = new BcryptHasher();
   const jwtSvc = new JWTService();
 
+  // Service
+  const fareService = new FareService(fareRepo);
+  const parcelService = new ParcelService(cityRepo, fareService);
+
   // Use case
   const authenticateUserUC = new AuthenticateUserUseCase(userRepo, hasher, jwtSvc);
   const registerUC = new RegisterUserUseCase(userRepo, hasher);
-  const fareService = new FareService(fareRepo);
-  const parcelService = new ParcelService(cityRepo, fareService);
   const getParcelQuoteUC = new GetParcelQuoteUseCase(parcelService);
+  const getAllCitiesUC = new GetAllCitiesUseCase(cityRepo);
 
   // Controllers
   const authCtrl = new AuthController(authenticateUserUC);
   const userCtrl = new UserController(registerUC);
   const parcelCtrl = new ParcelController(getParcelQuoteUC);
+  const cityCtrl = new CityController(getAllCitiesUC);
 
   app.post('/api/auth/login', authCtrl.login);
   app.post('/api/auth/register', userCtrl.register);
-  app.get('/api/parcel/quote', parcelCtrl.getFareValue);
+  app.post('/api/parcels/quote', parcelCtrl.getFareValue);
+  app.get('/api/cities', cityCtrl.getAllCities);
 
   const server = app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);

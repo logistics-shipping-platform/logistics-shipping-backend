@@ -1,9 +1,5 @@
-import {
-  UserRepositoryPort,
-  PasswordHasherPort,
-  TokenServicePort
-} from '../../domain/port/outbound';
-import { AuthenticateUserPort } from '../../domain/port/inbound';
+import { AuthenticateUserPort } from "../../../domain/port/inbound";
+import { PasswordHasherPort, TokenServicePort, UserRepositoryPort } from "../../../domain/port/outbound";
 
 export class AuthenticateUserUseCase implements AuthenticateUserPort {
 

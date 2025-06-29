@@ -1,7 +1,6 @@
-import { RegisterUserPort } from '../../domain/port/inbound/RegisterUserPort';
-import { UserRepositoryPort } from '../../domain/port/outbound/UserRepositoryPort';
-import { PasswordHasherPort } from '../../domain/port/outbound/PasswordHasherPort';
-import { User, DocType } from '../../domain/model/user';
+import { DocType, User } from "../../../domain/model/user";
+import { RegisterUserPort } from "../../../domain/port/inbound";
+import { PasswordHasherPort, UserRepositoryPort } from "../../../domain/port/outbound";
 
 export class RegisterUserUseCase implements RegisterUserPort {
   constructor(

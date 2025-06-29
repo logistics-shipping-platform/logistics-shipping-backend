@@ -11,13 +11,13 @@ describe('ParcelController (integración)', () => {
     const server = express();
     server.use(express.json());
 
-    server.get('/api/parcel/quote', (req, res, next) =>
+    server.post('/api/parcels/quote', (req, res, next) =>
       ctrl.getFareValue(req, res).catch(next)
     );
     return server;
   }
 
-  it('GET /api/parcel/quote → 200 y retorna chargeableWeight y price en caso exitoso', async () => {
+  it('POST /api/parcels/quote → 200 y retorna chargeableWeight y price en caso exitoso', async () => {
     const fakeUC = {
       execute: jest.fn().mockResolvedValue({
         getChargeableWeight: () => 12,
@@ -27,7 +27,7 @@ describe('ParcelController (integración)', () => {
     app = buildApp(fakeUC);
 
     await request(app)
-      .get('/api/parcel/quote')
+      .post('/api/parcels/quote')
       .send({ originId: 'orig', destinationId: 'dest', weight: 1, length: 2, width: 3, height: 4 })
       .expect(200)
       .expect(res => {
@@ -43,12 +43,12 @@ describe('ParcelController (integración)', () => {
       });
   });
 
-  it('GET /api/parcel/quote → 400 y mensaje de error sin originId', async () => {
+  it('GET /api/parcels/quote → 400 y mensaje de error sin originId', async () => {
     const fakeUC = { execute: jest.fn().mockRejectedValue(new Error('Error')) };
     app = buildApp(fakeUC);
 
     await request(app)
-      .get('/api/parcel/quote')
+      .post('/api/parcels/quote')
       .send({ })
       .expect(400)
       .expect(res => {
@@ -56,12 +56,12 @@ describe('ParcelController (integración)', () => {
       });
   });
 
-  it('GET /api/parcel/quote → 400 y mensaje de error sin destinationId', async () => {
+  it('GET /api/parcels/quote → 400 y mensaje de error sin destinationId', async () => {
     const fakeUC = { execute: jest.fn() };
     app = buildApp(fakeUC);
 
     await request(app)
-      .get('/api/parcel/quote')
+      .post('/api/parcels/quote')
       .send({
         originId: 'originTest'
       })
@@ -71,12 +71,12 @@ describe('ParcelController (integración)', () => {
         expect(fakeUC.execute).not.toHaveBeenCalled();
       });
   });
-  it('GET /api/parcel/quote → 400 y mensaje de error sin weight', async () => {
+  it('GET /api/parcels/quote → 400 y mensaje de error sin weight', async () => {
     const fakeUC = { execute: jest.fn() };
     app = buildApp(fakeUC);
 
     await request(app)
-      .get('/api/parcel/quote')
+      .post('/api/parcels/quote')
       .send({
         originId: 'originTest',
         destinationId: 'destinationTest'
@@ -88,12 +88,12 @@ describe('ParcelController (integración)', () => {
       });
   });
 
-  it('GET /api/parcel/quote → 400 y mensaje de error sin length', async () => {
+  it('GET /api/parcels/quote → 400 y mensaje de error sin length', async () => {
     const fakeUC = { execute: jest.fn() };
     app = buildApp(fakeUC);
 
     await request(app)
-      .get('/api/parcel/quote')
+      .post('/api/parcels/quote')
       .send({
         originId: 'originTest',
         destinationId: 'destinationTest',
@@ -106,12 +106,12 @@ describe('ParcelController (integración)', () => {
       });
   });
 
-  it('GET /api/parcel/quote → 400 y mensaje de error sin height', async () => {
+  it('GET /api/parcels/quote → 400 y mensaje de error sin height', async () => {
     const fakeUC = { execute: jest.fn() };
     app = buildApp(fakeUC);
 
     await request(app)
-      .get('/api/parcel/quote')
+      .post('/api/parcels/quote')
       .send({
         originId: 'originTest',
         destinationId: 'destinationTest',
@@ -125,12 +125,12 @@ describe('ParcelController (integración)', () => {
       });
   });
   
-  it('GET /api/parcel/quote → 400 y mensaje de error sin width', async () => {
+  it('GET /api/parcels/quote → 400 y mensaje de error sin width', async () => {
     const fakeUC = { execute: jest.fn() };
     app = buildApp(fakeUC);
 
     await request(app)
-      .get('/api/parcel/quote')
+      .post('/api/parcels/quote')
       .send({
         originId: 'originTest',
         destinationId: 'destinationTest',

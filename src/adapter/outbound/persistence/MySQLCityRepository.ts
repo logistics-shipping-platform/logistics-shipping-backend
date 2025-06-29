@@ -20,4 +20,14 @@ export class MySQLCityRepository implements CityRepositoryPort {
     
     return new City(foundCity[0].id, foundCity[0].name, foundCity[0].latitude, foundCity[0].longitude);
   }
+
+  /**
+   * Obtiene todas las ciudades.
+   * @return {Promise<City[]>}
+   */
+  async getCities(): Promise<City[]> {
+    const [rows] = await this.pool.query('SELECT id, name, latitude, longitude FROM cities');
+
+    return (rows as any[]).map(row => new City(row.id, row.name, row.latitude, row.longitude));
+  }
 }
