@@ -16,7 +16,7 @@ import {
 import {
   AuthController,
   CityController,
-  CreateShipmentController,
+  ShipmentController,
   ParcelController,
   UserController
 } from './adapter/inbound/http';
@@ -95,12 +95,12 @@ async function main() {
   const userCtrl = new UserController(registerUC);
   const parcelCtrl = new ParcelController(getParcelQuoteUC);
   const cityCtrl = new CityController(getAllCitiesUC);
-  const createShipmentCtrl = new CreateShipmentController(createShipmentUC);
+  const shipmentCtrl = new ShipmentController(createShipmentUC);
 
   app.post('/api/auth/login', authCtrl.login);
   app.post('/api/auth/register', userCtrl.register);
   app.post('/api/parcels/quote', parcelCtrl.getFareValue);
-  app.post('/api/shipments', createShipmentCtrl.createShipment);
+  app.post('/api/shipments', shipmentCtrl.createShipment);
   app.get('/api/cities', cityCtrl.getAllCities);
 
   const server = app.listen(port, () => {

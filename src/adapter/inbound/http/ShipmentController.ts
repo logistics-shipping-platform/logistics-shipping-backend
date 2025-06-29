@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { CreateShipmentUseCase } from '../../../application/usecase/shipment/CreateShipmentUseCase';
 import { CreateShipmentDTO } from './dto/CreateShipmentDTO';
 
-export class CreateShipmentController {
+export class ShipmentController {
     constructor(private createShipmentUC: CreateShipmentUseCase) { }
 
     /**
