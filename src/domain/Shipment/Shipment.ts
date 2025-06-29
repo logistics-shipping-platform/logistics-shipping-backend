@@ -11,7 +11,7 @@ export class Shipment {
         public readonly userId: string,
         public readonly parcel: Parcel,
         private history: StateHistoryEntry[] = [],
-        private state: ShipmentState = ShipmentState.PICKED_UP,
+        private state: ShipmentState = ShipmentState.WAITING,
     ) {
     }
 
