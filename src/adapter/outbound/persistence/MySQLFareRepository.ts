@@ -15,7 +15,7 @@ export class MySQLFareRepository implements FareRepositoryPort {
 
     const [rows] = await this.pool.query<any[]>(
       `SELECT id, type, from_value, to_value, price
-       FROM rates
+       FROM fares
        WHERE type = ?
        ORDER BY from_value`,
       [type]
@@ -33,7 +33,7 @@ export class MySQLFareRepository implements FareRepositoryPort {
   async findByTypeAndValue(type: FareType, value: number): Promise<Fare | null> {
     const [rows] = await this.pool.query<any[]>(
       `SELECT id, type, from_value, to_value, price
-       FROM rates
+       FROM fares
        WHERE type = ?
          AND from_value <= ?
          AND (to_value >= ? OR to_value IS NULL)

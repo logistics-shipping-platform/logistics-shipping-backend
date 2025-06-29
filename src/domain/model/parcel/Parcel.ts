@@ -15,9 +15,6 @@ export class Parcel {
   setPrice(price: number): void {
     this.price = price;
   }
-  setChargeableWeight(chargeableWeight: number): void {
-    this.chargeableWeight = chargeableWeight;
-  }
 
   getPrice(): number {
     return this.price ?? 0;
@@ -25,6 +22,26 @@ export class Parcel {
 
   getChargeableWeight(): number {
     return this.chargeableWeight ?? 0;
+  }
+
+  setChargeableWeight(chargeableWeight: number): void {
+    this.chargeableWeight = chargeableWeight;
+  }
+
+  getWeight(): number {
+    return this.weight;
+  }
+
+  getLength(): number {
+    return this.length;
+  }
+
+  getWidth(): number {
+    return this.width;
+  }
+  
+  getHeight(): number {
+    return this.height;
   }
 
   /**
