@@ -2,7 +2,7 @@ import { v4 as uuid } from 'uuid';
 import { ShipmentRepositoryPort } from "../../../domain/port/outbound/ShipmentRepositoryPort";
 import { Parcel } from '../../../domain/model/parcel';
 import { CreateShipmentDTO } from '../../../adapter/inbound/http/dto/CreateShipmentDTO';
-import { Shipment } from '../../../domain/Shipment';
+import { Shipment, ShipmentState } from '../../../domain/Shipment';
 
 export class CreateShipmentUseCase {
   constructor(
@@ -20,6 +20,9 @@ export class CreateShipmentUseCase {
     const shipment = new Shipment(
       id, dto.originId, dto.destinationId, dto.userId, parcel
     );
+    // Se cambia el estado del Shipment a WAITING (Estado Inicial)
+    shipment.changeState(ShipmentState.WAITING);
+    
     await this.shipmentRepo.create(shipment);
     return { shipmentId: id };
   }
