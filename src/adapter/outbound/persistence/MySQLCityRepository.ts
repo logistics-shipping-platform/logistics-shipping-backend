@@ -6,7 +6,7 @@ export class MySQLCityRepository implements CityRepositoryPort {
   constructor(private readonly pool: Pool) {}
     
   /**
-   * Obtiene la ciudad 
+   * Obtiene la ciudad por su ID.
    * @param {string} id - ID de la ciudad
    * @return {Promise<City>}
    */
