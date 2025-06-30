@@ -28,6 +28,7 @@ import { MySQLFareRepository } from './adapter/outbound/persistence/MySQLFareRep
 import { CreateShipmentUseCase } from './application/usecase/shipment/CreateShipmentUseCase';
 import { MYSQLShipmentRepository } from './adapter/outbound/persistence/MYSQLShipmentRepository';
 import { GetShipmentByIdUseCase } from './application/usecase/shipment/GetShipmentByIdUseCase';
+import { GetShipmentByUserIdPaginatedUseCase } from './application/usecase/shipment/GetShipmentByUserIdPaginatedUseCase';
 
 const secret = process.env.JWT_SECRET!;
 
@@ -94,13 +95,14 @@ async function main() {
   const getAllCitiesUC = new GetAllCitiesUseCase(cityRepo);
   const createShipmentUC = new CreateShipmentUseCase(shipmentRepo);
   const getShipmentByIdUC = new GetShipmentByIdUseCase(shipmentRepo);
+  const getShipmentByUserIdPaginatedUC = new GetShipmentByUserIdPaginatedUseCase(shipmentRepo);
 
   // Controllers
   const authCtrl = new AuthController(authenticateUserUC);
   const userCtrl = new UserController(registerUC);
   const parcelCtrl = new ParcelController(getParcelQuoteUC);
   const cityCtrl = new CityController(getAllCitiesUC);
-  const shipmentCtrl = new ShipmentController(createShipmentUC, getShipmentByIdUC);
+  const shipmentCtrl = new ShipmentController(createShipmentUC, getShipmentByIdUC, getShipmentByUserIdPaginatedUC);
 
   // POSTS
   app.post('/api/auth/login', authCtrl.login);
@@ -111,6 +113,7 @@ async function main() {
   // GETS
   app.get('/api/cities', cityCtrl.getAllCities);
   app.get('/api/shipments/:id', shipmentCtrl.getShipmentById);
+  app.get('/api/shipments', shipmentCtrl.getShipmentsByUserIdPaginated);
 
   const server = app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);

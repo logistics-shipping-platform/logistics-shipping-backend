@@ -71,9 +71,91 @@ export class MYSQLShipmentRepository implements ShipmentRepositoryPort {
     async findById(id: string): Promise<Shipment | null> {
         const connection = await this.pool.getConnection();
         try {
-            // Obtiene el Shipment por id
-            const [rows] = await connection.execute<RowDataPacket[]>(
-                `SELECT 
+            const [rows] = await connection.execute<any[]>(`
+            SELECT
+                s.id,
+                s.origin_id        AS originId,
+                s.destination_id   AS destinationId,
+                s.user_id          AS userId,
+                s.parcel_weight    AS weight,
+                s.parcel_length    AS length,
+                s.parcel_width     AS width,
+                s.parcel_height    AS height,
+                s.chargeable_weight,
+                s.price,
+                s.current_state    AS state,
+                s.created_at       AS createdAt,
+                COALESCE(
+                JSON_ARRAYAGG(
+                    JSON_OBJECT(
+                    'state',     sh.state,
+                    'changedAt', sh.changed_at
+                    )
+                ),
+                JSON_ARRAY()
+                ) AS historyJson
+            FROM shipments s
+            INNER JOIN shipment_state_history sh
+                ON sh.shipment_id = s.id
+            WHERE s.id = ?
+            GROUP BY s.id;
+        `, [id]);
+
+            if (rows.length === 0) {
+                return null;
+            }
+
+            const r = rows[0];
+
+            // Se construye el Parcel a partir de los datos almacenados en el Shipment
+            const parcel = new Parcel(
+                r.weight,
+                r.length,
+                r.width,
+                r.height
+            );
+            parcel.setChargeableWeight(r.chargeable_weight);
+            parcel.setPrice(r.price);
+
+            // Se convierte el JSON de historial de estados a un array de objetos
+            const historyArray: { state: string; changedAt: string }[] = JSON.parse(r.historyJson);
+            const stateHistory: StateHistoryEntry[] = historyArray.map(entry => ({
+                state: entry.state as ShipmentState,
+                changedAt: new Date(entry.changedAt),
+            }));
+
+            // Se crea la entidad Shipment
+            return new Shipment(
+                r.id,
+                r.originId,
+                r.destinationId,
+                r.userId,
+                parcel,
+                stateHistory,
+                r.state as ShipmentState,
+                r.createdAt
+            );
+
+        } finally {
+            connection.release();
+        }
+    }
+
+    /**
+     * Busca un conjunto de Shipments por el id del usuario propietario.
+     * @param userId - El id del usuario propietario de los Shipments.
+     * @param page - El número de página a obtener.
+     * @param count - La cantidad de Shipments por página.
+     * @returns Una promesa que resuelve con un array de Shipments.
+     */
+    async findAllByUserIdPaginated(userId: string, page: number, count: number): Promise<Shipment[]> {
+        const offset = page * count;
+        const conn = await this.pool.getConnection();
+        try {
+
+            // Query paginada
+            let rows: RowDataPacket[];
+            const listSql = `SELECT
                     id,
                     origin_id   AS originId,
                     destination_id AS destinationId,
@@ -87,56 +169,42 @@ export class MYSQLShipmentRepository implements ShipmentRepositoryPort {
                     current_state    AS state,
                     created_at       AS createdAt
                     FROM shipments
-                    WHERE id = ?`,
-                [id]
-            );
-            if (rows.length === 0) {
-                return null;
-            }
-            const shipmentFound = rows[0];
-            // Construye el Parcel a partir de los datos almacenados en el Shipment
-            const parcel = new Parcel(
-                shipmentFound.weight,
-                shipmentFound.length,
-                shipmentFound.width,
-                shipmentFound.height
-            );
-            parcel.setChargeableWeight(shipmentFound.chargeable_weight);
-            parcel.setPrice(shipmentFound.price);
+                    WHERE user_id = ?
+                    ORDER BY created_at DESC
+                    LIMIT ? OFFSET ?
+                `;
+            rows = (await conn.query<RowDataPacket[]>(listSql, [userId, count, offset]))[0];
 
-            //Carga el historial de estados
-            const [histRows] = await connection.query<RowDataPacket[]>(
-                `SELECT 
-                    id,
-                    state,
-                    changed_at
-                    FROM shipment_state_history
-                    WHERE shipment_id = ?
-                    ORDER BY changed_at ASC`,
-                [id]
-            );
+            // Mapeo a Shipment
+            const shipments: Shipment[] = rows.map(shipmentFound => {
 
-            //Se convierte el historial de estados a un array de StateHistoryEntry
-            const stateHistory: StateHistoryEntry[] = histRows.map(historyData => ({
-                state: historyData.state as ShipmentState,
-                changedAt: new Date(historyData.changed_at),
-            }));
+                // Construye el Parcel a partir de los datos almacenados en el Shipment
+                const parcel = new Parcel(
+                    shipmentFound.weight,
+                    shipmentFound.length,
+                    shipmentFound.width,
+                    shipmentFound.height
+                );
+                parcel.setChargeableWeight(shipmentFound.chargeable_weight);
+                parcel.setPrice(shipmentFound.price);
 
-            //Se Crea la entidad Shipment e inyecta el historial
-            const shipment = new Shipment(
-                shipmentFound.id,
-                shipmentFound.originId,
-                shipmentFound.destinationId,
-                shipmentFound.userId,
-                parcel,
-                stateHistory,
-                shipmentFound.state as ShipmentState,
-                shipmentFound.createdAt
-            );
+                //Se Crea la entidad Shipment
+                const shipment = new Shipment(
+                    shipmentFound.id,
+                    shipmentFound.originId,
+                    shipmentFound.destinationId,
+                    shipmentFound.userId,
+                    parcel,
+                    [],
+                    shipmentFound.state as ShipmentState,
+                    shipmentFound.createdAt
+                );
+                return shipment;
+            });
 
-            return shipment;
+            return shipments;
         } finally {
-            connection.release();
+            conn.release();
         }
     }
 
