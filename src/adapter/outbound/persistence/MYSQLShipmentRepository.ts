@@ -65,7 +65,9 @@ export class MYSQLShipmentRepository implements ShipmentRepositoryPort {
 
             // Se convierte el JSON de historial de estados a un array de objetos
             const historyArray: { state: string; changedAt: string }[] = JSON.parse(r.historyJson);
-            const stateHistory: StateHistoryEntry[] = historyArray.map(entry => ({
+            const stateHistory: StateHistoryEntry[] = historyArray
+            .sort((a, b) => a.changedAt.localeCompare(b.changedAt))
+            .map(entry => ({
                 state: entry.state as ShipmentState,
                 changedAt: new Date(entry.changedAt),
             }));
@@ -167,12 +169,18 @@ export class MYSQLShipmentRepository implements ShipmentRepositoryPort {
                 `SELECT 
                         id,
                         current_state,
-                        changed_at
+                        changed_at,
+                        created_at
                     FROM shipments
-                    WHERE changed_at > ?
+                    WHERE changed_at > ? 
+                    AND changed_at IS NOT NULL
                     ORDER BY changed_at ASC`,
                 [sinceUtc]
             );
+
+            if(rows.length > 0) {
+                console.log(`Found ${rows}`);
+            }
             return rows.map(shipmentFound => {
                 return { id: shipmentFound.id, state: shipmentFound.current_state as ShipmentState };
             });

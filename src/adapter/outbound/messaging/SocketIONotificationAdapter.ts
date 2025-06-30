@@ -49,11 +49,6 @@ export class SocketIONotificationAdapter implements NotificationPort {
             const shipmentList = await shipmentRepo.findChangedSince(lastCheck);
             for (const shipment of shipmentList) {
 
-                const changedAt = new Date();
-
-                // Actualiza el estado del envío en el repo
-                await shipmentRepo.updateState(shipment.id, shipment.state, changedAt);
-
                 await changeStateUC.execute(shipment.id, shipment.state);
             }
 
