@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express, { NextFunction, Request, Response, RequestHandler } from 'express';
 import { pool } from './config/MysqlDatabase';
 import cors from 'cors';
+import http from 'http';
 
 import {
   BcryptHasher,
@@ -29,6 +30,8 @@ import { CreateShipmentUseCase } from './application/usecase/shipment/CreateShip
 import { MYSQLShipmentRepository } from './adapter/outbound/persistence/MYSQLShipmentRepository';
 import { GetShipmentByIdUseCase } from './application/usecase/shipment/GetShipmentByIdUseCase';
 import { GetShipmentByUserIdPaginatedUseCase } from './application/usecase/shipment/GetShipmentByUserIdPaginatedUseCase';
+import { SocketIONotificationAdapter } from './adapter/outbound/messaging/SocketIONotificationAdapter';
+import { ChangeShipmentStateUseCase } from './application/usecase/shipment/ChangeShipmentStateUseCase';
 
 const secret = process.env.JWT_SECRET!;
 
@@ -83,6 +86,7 @@ async function main() {
   const shipmentRepo = new MYSQLShipmentRepository(pool);
   const hasher = new BcryptHasher();
   const jwtSvc = new JWTService();
+  
 
   // Service
   const fareService = new FareService(fareRepo);
@@ -96,6 +100,7 @@ async function main() {
   const createShipmentUC = new CreateShipmentUseCase(shipmentRepo);
   const getShipmentByIdUC = new GetShipmentByIdUseCase(shipmentRepo);
   const getShipmentByUserIdPaginatedUC = new GetShipmentByUserIdPaginatedUseCase(shipmentRepo);
+
 
   // Controllers
   const authCtrl = new AuthController(authenticateUserUC);
@@ -115,12 +120,50 @@ async function main() {
   app.get('/api/shipments/:id', shipmentCtrl.getShipmentById);
   app.get('/api/shipments', shipmentCtrl.getShipmentsByUserIdPaginated);
 
-  const server = app.listen(port, () => {
+  //Se crea un servidor HTTP y se configura el adaptador de notificaciones Socket.IO
+  const server = http.createServer(app);
+  const notifier = new SocketIONotificationAdapter(server);
+  const changeStateUC = new ChangeShipmentStateUseCase(shipmentRepo, notifier);
+  
+  notifier.onConnection();
+
+  // Middleware de Socket.IO para validar el JWT en el handshake
+  notifier.getIo().use((socket, next) => {
+
+    const token = socket.handshake.auth?.token as string | undefined;
+    if (!token) {
+      return next(new Error('No token provided'));
+    }
+    try {
+      const payload = jwt.verify(token, process.env.JWT_SECRET!) as any;
+      socket.data.userId = payload.userId;
+      return next();
+    } catch (err) {
+      return next(new Error('Invalid token'));
+    }
+  });
+
+  // Se configura el canal de Socket.IO para que los clientes puedan suscribirse a actualizaciones de envíos que solo le pertenecen a ellos
+  notifier.getIo().on('connection', socket => {
+    socket.on('subscribe', (channel: string) => {
+      const [, shipmentId] = channel.split('.');
+      if (socket.data.userId !== shipmentId) {
+        return socket.emit('error', 'Not authorized');
+      }
+      socket.join(channel);
+    });
+  });
+
+  // Inicia el watcher de envíos para emitir actualizaciones periódicas
+  notifier.startShipmentWatcher(shipmentRepo, changeStateUC, parseInt(process.env.WS_WATCHER_TIMESTAMP || '3000'));
+
+  server.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
   });
 
   server.on('error', err => {
     console.error('Server error:', err);
+    process.exit(1);
   });
 }
 
