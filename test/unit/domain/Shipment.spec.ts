@@ -1,5 +1,6 @@
 import { Parcel } from "../../../src/domain/model/parcel";
-import { Shipment, ShipmentState, StateHistoryEntry } from "../../../src/domain/Shipment";
+import { Shipment, ShipmentState, StateHistoryEntry } from "../../../src/domain/model/shipment";
+
 
 const parcel = new Parcel(1, 22, 16, 11);
 parcel.setChargeableWeight(2);

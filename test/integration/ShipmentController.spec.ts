@@ -6,8 +6,8 @@ import { GetShipmentByIdUseCase } from "../../src/application/usecase/shipment/G
 import { GetShipmentByUserIdPaginatedUseCase } from "../../src/application/usecase/shipment/GetShipmentByUserIdPaginatedUseCase";
 import { CreateShipmentUseCase } from "../../src/application/usecase/shipment/CreateShipmentUseCase";
 
-import { Shipment, ShipmentState, StateHistoryEntry } from "../../src/domain/Shipment";
 import { Parcel } from "../../src/domain/model/parcel";
+import { Shipment, ShipmentState, StateHistoryEntry } from "../../src/domain/model/shipment";
 
 
 declare global {
@@ -280,7 +280,8 @@ describe('ShipmentController (integración)', () => {
                 changedAt: "2025-06-29T23:46:26.000Z"
               }
             ],
-            state: "WAITING"
+            state: "WAITING",
+            createdAt: "2025-06-29T23:46:26.000Z"
           });
         });
     });
@@ -341,7 +342,7 @@ describe('ShipmentController (integración)', () => {
         .query({ page: 0, count: 10 })
         .expect(200)
         .expect(res => {
-          expect(res.body).toEqual([{ "chargeableWeight": 2, "destinationId": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", "height": 11, "id": "86779142-2bae-4264-aee6-ac7bb69bd085", "length": 22, "originId": "11111111-1111-1111-1111-111111111111", "price": 4500, "state": "WAITING", "weight": 1, "width": 16 }]);
+          expect(res.body).toEqual([{ "chargeableWeight": 2, "destinationId": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", "height": 11, "id": "86779142-2bae-4264-aee6-ac7bb69bd085", "length": 22, "originId": "11111111-1111-1111-1111-111111111111", "price": 4500, "state": "WAITING", "createdAt": "2025-06-29T23:46:26.000Z", "weight": 1, "width": 16 }]);
         });
     });
 

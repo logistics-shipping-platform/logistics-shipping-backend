@@ -2,7 +2,8 @@ import { v4 as uuid } from 'uuid';
 import { ShipmentRepositoryPort } from "../../../domain/port/outbound/ShipmentRepositoryPort";
 import { Parcel } from '../../../domain/model/parcel';
 import { CreateShipmentDTO } from '../../../adapter/inbound/http/dto/CreateShipmentDTO';
-import { Shipment, ShipmentState } from '../../../domain/Shipment';
+import { Shipment, ShipmentState } from '../../../domain/model/shipment';
+
 
 export class CreateShipmentUseCase {
   constructor(

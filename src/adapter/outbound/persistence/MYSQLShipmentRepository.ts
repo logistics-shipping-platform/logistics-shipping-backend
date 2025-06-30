@@ -1,5 +1,5 @@
 import { Parcel } from "../../../domain/model/parcel";
-import { Shipment, ShipmentState, StateHistoryEntry } from "../../../domain/Shipment";
+import { Shipment, ShipmentState, StateHistoryEntry } from "../../../domain/model/shipment";
 import { ShipmentRepositoryPort } from "../../../domain/port/outbound/ShipmentRepositoryPort";
 import { Pool, RowDataPacket } from 'mysql2/promise';
 import { v4 as uuid } from 'uuid';

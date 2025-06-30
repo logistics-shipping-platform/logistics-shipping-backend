@@ -1,5 +1,5 @@
 import { ShipmentRepositoryPort } from "../../../domain/port/outbound/ShipmentRepositoryPort";
-import { Shipment } from '../../../domain/Shipment';
+import { Shipment } from '../../../domain/model/shipment';
 
 export class GetShipmentByIdUseCase {
   constructor(
