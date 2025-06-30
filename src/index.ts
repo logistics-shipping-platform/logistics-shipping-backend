@@ -32,6 +32,7 @@ import { GetShipmentByIdUseCase } from './application/usecase/shipment/GetShipme
 import { GetShipmentByUserIdPaginatedUseCase } from './application/usecase/shipment/GetShipmentByUserIdPaginatedUseCase';
 import { SocketIONotificationAdapter } from './adapter/outbound/messaging/SocketIONotificationAdapter';
 import { ChangeShipmentStateUseCase } from './application/usecase/shipment/ChangeShipmentStateUseCase';
+import { RedisCacheAdapter } from './adapter/outbound/cache/RedisCacheAdapter';
 
 const secret = process.env.JWT_SECRET!;
 
@@ -86,7 +87,8 @@ async function main() {
   const shipmentRepo = new MYSQLShipmentRepository(pool);
   const hasher = new BcryptHasher();
   const jwtSvc = new JWTService();
-  
+  const cache = new RedisCacheAdapter(process.env.REDIS_URL || 'redis://localhost:6379');
+
 
   // Service
   const fareService = new FareService(fareRepo);
@@ -96,7 +98,7 @@ async function main() {
   const authenticateUserUC = new AuthenticateUserUseCase(userRepo, hasher, jwtSvc);
   const registerUC = new RegisterUserUseCase(userRepo, hasher);
   const getParcelQuoteUC = new GetParcelQuoteUseCase(parcelService);
-  const getAllCitiesUC = new GetAllCitiesUseCase(cityRepo);
+  const getAllCitiesUC = new GetAllCitiesUseCase(cityRepo, cache);
   const createShipmentUC = new CreateShipmentUseCase(shipmentRepo);
   const getShipmentByIdUC = new GetShipmentByIdUseCase(shipmentRepo);
   const getShipmentByUserIdPaginatedUC = new GetShipmentByUserIdPaginatedUseCase(shipmentRepo);
@@ -124,24 +126,8 @@ async function main() {
   const server = http.createServer(app);
   const notifier = new SocketIONotificationAdapter(server);
   const changeStateUC = new ChangeShipmentStateUseCase(shipmentRepo, notifier);
-  
+
   notifier.onConnection();
-
-  // Middleware de Socket.IO para validar el JWT en el handshake
-  notifier.getIo().use((socket, next) => {
-
-    const token = socket.handshake.auth?.token as string | undefined;
-    if (!token) {
-      return next(new Error('No token provided'));
-    }
-    try {
-      const payload = jwt.verify(token, process.env.JWT_SECRET!) as any;
-      socket.data.userId = payload.userId;
-      return next();
-    } catch (err) {
-      return next(new Error('Invalid token'));
-    }
-  });
 
   // Se configura el canal de Socket.IO para que los clientes puedan suscribirse a actualizaciones de envíos que solo le pertenecen a ellos
   notifier.getIo().on('connection', socket => {

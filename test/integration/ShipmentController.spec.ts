@@ -62,16 +62,19 @@ describe('ShipmentController (integración)', () => {
   }];
 
   let getByUserPaginatedFakeUC = {
-    execute: jest.fn().mockResolvedValue([new Shipment(
-      "86779142-2bae-4264-aee6-ac7bb69bd085",
-      "11111111-1111-1111-1111-111111111111",
-      "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
-      "dc7fc307-8da0-47ac-a068-0e130f44aa97",
-      parcel,
-      [],
-      ShipmentState.WAITING,
-      new Date("2025-06-29T23:46:26.000Z")
-    )])
+    execute: jest.fn().mockResolvedValue([{
+      "chargeableWeight": 2,
+      "destinationId": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+      "height": 11,
+      "id": "86779142-2bae-4264-aee6-ac7bb69bd085",
+      "length": 22,
+      "originId": "11111111-1111-1111-1111-111111111111",
+      "price": 4500,
+      "state": "WAITING",
+      "createdAt": "2025-06-29T23:46:26.000Z",
+      "weight": 1,
+      "width": 16
+    }])
   };
 
 
@@ -342,13 +345,25 @@ describe('ShipmentController (integración)', () => {
         .query({ page: 0, count: 10 })
         .expect(200)
         .expect(res => {
-          expect(res.body).toEqual([{ "chargeableWeight": 2, "destinationId": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", "height": 11, "id": "86779142-2bae-4264-aee6-ac7bb69bd085", "length": 22, "originId": "11111111-1111-1111-1111-111111111111", "price": 4500, "state": "WAITING", "createdAt": "2025-06-29T23:46:26.000Z", "weight": 1, "width": 16 }]);
+          expect(res.body).toEqual([{
+            "chargeableWeight": 2,
+            "destinationId": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
+            "height": 11,
+            "id": "86779142-2bae-4264-aee6-ac7bb69bd085",
+            "length": 22,
+            "originId": "11111111-1111-1111-1111-111111111111",
+            "price": 4500,
+            "state": "WAITING",
+            "createdAt": "2025-06-29T23:46:26.000Z",
+            "weight": 1,
+            "width": 16
+          }]);
         });
     });
 
 
-     it('GET /api/shipments/ → 200 y la lista vacia ', async () => {
-       getByUserPaginatedFakeUC = {
+    it('GET /api/shipments/ → 200 y la lista vacia ', async () => {
+      getByUserPaginatedFakeUC = {
         execute: jest.fn().mockResolvedValue([])
       };
       app = buildApp(createFakeUC, getFakeUC, getByUserPaginatedFakeUC);
@@ -362,7 +377,7 @@ describe('ShipmentController (integración)', () => {
     });
 
     it('GET /api/shipments/ → 400 y mensaje de error page invalido', async () => {
-       getByUserPaginatedFakeUC = {
+      getByUserPaginatedFakeUC = {
         execute: jest.fn().mockResolvedValue([])
       };
       app = buildApp(createFakeUC, getFakeUC, getByUserPaginatedFakeUC);
@@ -378,7 +393,7 @@ describe('ShipmentController (integración)', () => {
     });
 
     it('GET /api/shipments/ → 400 y mensaje de error count invalido', async () => {
-       getByUserPaginatedFakeUC = {
+      getByUserPaginatedFakeUC = {
         execute: jest.fn().mockResolvedValue([])
       };
       app = buildApp(createFakeUC, getFakeUC, getByUserPaginatedFakeUC);
@@ -394,7 +409,7 @@ describe('ShipmentController (integración)', () => {
     });
 
     it('GET /api/shipments/ → 400 y mensaje de error userId invalido', async () => {
-       getByUserPaginatedFakeUC = {
+      getByUserPaginatedFakeUC = {
         execute: jest.fn().mockResolvedValue([])
       };
       app = buildApp(createFakeUC, getFakeUC, getByUserPaginatedFakeUC, false);
@@ -410,7 +425,7 @@ describe('ShipmentController (integración)', () => {
     });
 
     it('GET /api/shipments/ → 400 y mensaje de error count invalido', async () => {
-       getByUserPaginatedFakeUC = {
+      getByUserPaginatedFakeUC = {
         execute: jest.fn().mockRejectedValue(new Error('Error al consultar los envíos'))
       };
       app = buildApp(createFakeUC, getFakeUC, getByUserPaginatedFakeUC);

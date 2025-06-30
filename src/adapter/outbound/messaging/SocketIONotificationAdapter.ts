@@ -45,20 +45,18 @@ export class SocketIONotificationAdapter implements NotificationPort {
     ) {
         let lastCheck = new Date();
         setInterval(async () => {
-            try {
-                const shipmentList = await shipmentRepo.findChangedSince(lastCheck);
-                for (const shipment of shipmentList) {
+            
+            const shipmentList = await shipmentRepo.findChangedSince(lastCheck);
+            for (const shipment of shipmentList) {
 
-                    const changedAt = new Date();
+                const changedAt = new Date();
 
-                    // Actualiza el estado del envío en el repo
-                    await shipmentRepo.updateState(shipment.id, shipment.state, changedAt);
+                // Actualiza el estado del envío en el repo
+                await shipmentRepo.updateState(shipment.id, shipment.state, changedAt);
 
-                    await changeStateUC.execute(shipment.id, shipment.state);
-                }
-            } catch (err) {
-                console.error('Watcher error:', err);
+                await changeStateUC.execute(shipment.id, shipment.state);
             }
+
             lastCheck = new Date();
         }, pollIntervalMs);
     }

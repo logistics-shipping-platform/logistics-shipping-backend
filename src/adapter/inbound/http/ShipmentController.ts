@@ -106,21 +106,7 @@ export class ShipmentController {
             // Se ejecuta el caso de uso para obtener los envíos paginados
             const shipments = await this.getShipmentByUserIdPaginatedUC.execute(findDto);
 
-            res.status(200).json(shipments.map(shipment => {
-                return {
-                    id: shipment.getId(),
-                    originId: shipment.getOriginId(),
-                    destinationId: shipment.getDestinationId(),
-                    weight: shipment.getParcel().getWeight(),
-                    length: shipment.getParcel().getLength(),
-                    width: shipment.getParcel().getWidth(),
-                    height: shipment.getParcel().getHeight(),
-                    chargeableWeight: shipment.getParcel().getChargeableWeight(),
-                    price: shipment.getParcel().getPrice(),
-                    state: shipment.getState(),
-                    createdAt: shipment.getCreatedAt(),
-                }
-            }));
+            res.status(200).json(shipments);
         } catch (err: any) {
             res.status(500).json({ error: 'Error al obtener los envíos' });
         }

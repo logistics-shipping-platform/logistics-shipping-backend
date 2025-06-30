@@ -1,3 +1,4 @@
+export * from './CachePort';
 export * from './CityRepositoryPort';
 export * from './FareRepositoryPort';
 export * from './NotificationPort';

@@ -16,7 +16,7 @@ export class CityController {
             const cities  = await this.getAllCitiesUC.execute();
 
             //Se proyectan los datos que se desean enviar y se genera la respuesta
-            const citiesProjected = cities.map(city => ({ id: city.getId(), name: city.getName() }));
+            const citiesProjected = cities.map(city => ({ id: city.id, name: city.name }));
             res.status(200).json({ cities: citiesProjected });
         } catch (err: any) {
             res.status(500).json({ error: "Error al obtener las ciudades" });
