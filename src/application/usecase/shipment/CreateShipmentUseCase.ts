@@ -9,6 +9,11 @@ export class CreateShipmentUseCase {
     private readonly shipmentRepo: ShipmentRepositoryPort
   ) {}
 
+  /**
+   * Crea un nuevo envío con los datos proporcionados en el DTO.
+   * @param dto - Objeto DTO que contiene los datos necesarios para crear el envío.
+   * @returns Una promesa que resuelve con el ID del envío creado.
+   */
   async execute(dto: CreateShipmentDTO): Promise<{ shipmentId: string }> {
     const id = uuid();
     // Se prepara el objeto Parcel con los datos del DTO

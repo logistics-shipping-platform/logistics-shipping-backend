@@ -19,7 +19,7 @@ export class CityController {
             const citiesProjected = cities.map(city => ({ id: city.getId(), name: city.getName() }));
             res.status(200).json({ cities: citiesProjected });
         } catch (err: any) {
-            res.status(400).json({ error: err.message });
+            res.status(500).json({ error: "Error al obtener las ciudades" });
         }
     }
 }

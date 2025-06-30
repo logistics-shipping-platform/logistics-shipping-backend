@@ -5,14 +5,35 @@ import { StateHistoryEntry } from "./StateHistoryEntry";
 export class Shipment {
 
     constructor(
-        public readonly id: string,
-        public readonly originId: string,
-        public readonly destinationId: string,
-        public readonly userId: string,
-        public readonly parcel: Parcel,
-        private history: StateHistoryEntry[] = [],
-        private state: ShipmentState = ShipmentState.WAITING,
+        private readonly id: string,
+        private readonly originId: string,
+        private readonly destinationId: string,
+        private readonly userId: string,
+        private readonly parcel: Parcel,
+        private stateHistory: StateHistoryEntry[] = [],
+        private state: ShipmentState = ShipmentState.CREATED,
+        private createdAt: Date = new Date()
     ) {
+    }
+
+    getId(): string {
+        return this.id;
+    }
+
+    getOriginId(): string {
+        return this.originId;
+    }
+
+    getDestinationId(): string {
+        return this.destinationId;
+    }
+
+    getUserId(): string {
+        return this.userId;
+    }
+
+    getParcel(): Parcel {
+        return this.parcel;
     }
 
     getState(): ShipmentState {
@@ -20,7 +41,15 @@ export class Shipment {
     }
 
     getStateHistory(): ReadonlyArray<StateHistoryEntry> {
-        return this.history;
+        return this.stateHistory;
+    }
+
+    getCreatedAt(): Date {
+        return this.createdAt;
+    }
+
+    setCreatedAt(createdAt: Date): void {
+        this.createdAt = createdAt;
     }
 
     /**
@@ -40,6 +69,6 @@ export class Shipment {
      * @private
      */
     private recordState(newState: ShipmentState) {
-        this.history.push({ state: newState, changedAt: new Date() });
+        this.stateHistory.push({ state: newState, changedAt: new Date() });
     }
 }
