@@ -8,6 +8,12 @@ export class ChangeShipmentStateUseCase {
     private notifier: NotificationPort
   ) {}
 
+  /**
+   * Cambia el estado de un envío y notifica a los suscriptores.
+   * @param shipmentId - El ID del envío cuyo estado se va a cambiar.
+   * @param newState - El nuevo estado que se asignará al envío.
+   * @returns Una promesa que resuelve cuando se complete la operación.
+   */
   async execute(shipmentId: string, newState: ShipmentState): Promise<void> {
     
     //Se edita el estado del envío
