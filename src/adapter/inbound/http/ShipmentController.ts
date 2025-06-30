@@ -71,6 +71,7 @@ export class ShipmentController {
                 chargeableWeight: shipment.getParcel().getChargeableWeight(),
                 price: shipment.getParcel().getPrice(),
                 stateHistory: shipment.getStateHistory(),
+                createdAt: shipment.getCreatedAt(),
                 state: shipment.getState()
             });
         } catch (err: any) {
@@ -116,7 +117,8 @@ export class ShipmentController {
                     height: shipment.getParcel().getHeight(),
                     chargeableWeight: shipment.getParcel().getChargeableWeight(),
                     price: shipment.getParcel().getPrice(),
-                    state: shipment.getState()
+                    state: shipment.getState(),
+                    createdAt: shipment.getCreatedAt(),
                 }
             }));
         } catch (err: any) {
