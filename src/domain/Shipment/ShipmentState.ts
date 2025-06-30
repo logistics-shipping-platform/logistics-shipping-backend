@@ -1,4 +1,5 @@
 export enum ShipmentState {
+  CREATED = 'CREATED',
   WAITING = 'WAITING',
   IN_TRANSIT= 'IN_TRANSIT',
   DELIVERED = 'DELIVERED',

@@ -27,6 +27,7 @@ import { FareService } from './domain/service/FareService';
 import { MySQLFareRepository } from './adapter/outbound/persistence/MySQLFareRepository';
 import { CreateShipmentUseCase } from './application/usecase/shipment/CreateShipmentUseCase';
 import { MYSQLShipmentRepository } from './adapter/outbound/persistence/MYSQLShipmentRepository';
+import { GetShipmentByIdUseCase } from './application/usecase/shipment/GetShipmentByIdUseCase';
 
 const secret = process.env.JWT_SECRET!;
 
@@ -40,7 +41,9 @@ process.on('unhandledRejection', err => {
 async function main() {
   const app = express();
   const port = process.env.API_GATEWAY_PORT || 3000;
+
   app.use(express.json());
+
   app.use(cors({
     origin: 'http://localhost:5173',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -48,6 +51,7 @@ async function main() {
     credentials: true
   }));
 
+  // Middleware que se encarga de verificar el token JWT en las solicitudes (excepto en las rutas de login y registro)
   const authMiddleware: RequestHandler = (req, res, next) => {
     if (req.path.startsWith('/api/auth')) {
       next();
@@ -71,7 +75,7 @@ async function main() {
   };
   app.use(authMiddleware);
 
-  // Adapters outbound
+  // Adapters
   const userRepo = new MySQLUserRepo();
   const cityRepo = new MySQLCityRepository(pool);
   const fareRepo = new MySQLFareRepository(pool);
@@ -89,19 +93,24 @@ async function main() {
   const getParcelQuoteUC = new GetParcelQuoteUseCase(parcelService);
   const getAllCitiesUC = new GetAllCitiesUseCase(cityRepo);
   const createShipmentUC = new CreateShipmentUseCase(shipmentRepo);
+  const getShipmentByIdUC = new GetShipmentByIdUseCase(shipmentRepo);
 
   // Controllers
   const authCtrl = new AuthController(authenticateUserUC);
   const userCtrl = new UserController(registerUC);
   const parcelCtrl = new ParcelController(getParcelQuoteUC);
   const cityCtrl = new CityController(getAllCitiesUC);
-  const shipmentCtrl = new ShipmentController(createShipmentUC);
+  const shipmentCtrl = new ShipmentController(createShipmentUC, getShipmentByIdUC);
 
+  // POSTS
   app.post('/api/auth/login', authCtrl.login);
   app.post('/api/auth/register', userCtrl.register);
   app.post('/api/parcels/quote', parcelCtrl.getFareValue);
   app.post('/api/shipments', shipmentCtrl.createShipment);
+
+  // GETS
   app.get('/api/cities', cityCtrl.getAllCities);
+  app.get('/api/shipments/:id', shipmentCtrl.getShipmentById);
 
   const server = app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);

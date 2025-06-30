@@ -57,4 +57,17 @@ describe('CityController (integración)', () => {
       });
   });
 
+  it('GET /api/cities → 500 y retorna un error', async () => {
+    const fakeUC = { execute: jest.fn().mockRejectedValue(new Error('Error interno')) };
+    app = buildApp(fakeUC);
+
+    await request(app)
+      .get('/api/cities')
+      .expect(500)
+      .expect(res => {
+        expect(res.body).toEqual({ error: "Error al obtener las ciudades" });
+        expect(fakeUC.execute).toHaveBeenCalled();
+      });
+  });
+
 });
