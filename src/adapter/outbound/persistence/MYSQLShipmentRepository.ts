@@ -8,60 +8,6 @@ export class MYSQLShipmentRepository implements ShipmentRepositoryPort {
 
     constructor(private readonly pool: Pool) { }
 
-    /**
-     * Crea un nuevo Shipment en la base de datos.
-     * @param shipment - El objeto Shipment a guardar.
-     * @returns Una promesa que se resuelve cuando el Shipment ha sido guardado.
-     */
-    async create(shipment: Shipment): Promise<void> {
-        const connection = await this.pool.getConnection();
-        try {
-            //Inserta el Shipment en la tabla shipments
-            const sqlInsertShipment = `
-                INSERT INTO shipments 
-                    (id, origin_id, destination_id, user_id, chargeable_weight, price, parcel_weight, parcel_length, parcel_width, parcel_height, current_state, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            `;
-            await connection.execute(sqlInsertShipment, [
-                shipment.getId(),
-                shipment.getOriginId(),
-                shipment.getDestinationId(),
-                shipment.getUserId(),
-                shipment.getParcel().getChargeableWeight(),
-                shipment.getParcel().getPrice(),
-                shipment.getParcel().getWeight(),
-                shipment.getParcel().getLength(),
-                shipment.getParcel().getWidth(),
-                shipment.getParcel().getHeight(),
-                shipment.getState(),
-                new Date()
-            ]);
-            //Prepara los datos para insertar en la tabla shipment_state_history
-            const historyId = uuid();
-            const firstHistory = shipment.getStateHistory()[0];
-
-            // Inserta el primer estado del Shipment en la tabla shipment_state_history
-            const sql2 = `
-                INSERT INTO shipment_state_history
-                    (id, shipment_id, state, changed_at)
-                VALUES (?, ?, ?, ?)
-            `;
-            await connection.execute(sql2, [
-                historyId,
-                shipment.getId(),
-                firstHistory.state,
-                firstHistory.changedAt
-            ]);
-        } catch (err) {
-            console.error('Error al crear el Shipment:', err);
-            await connection.rollback();
-            throw new Error('Error al crear el envio, por favor intente nuevamente más tarde.');
-        } finally {
-            connection.release();
-        }
-
-
-    }
 
     /**
      * Busca un Shipment por su ID.
@@ -208,7 +154,115 @@ export class MYSQLShipmentRepository implements ShipmentRepositoryPort {
         }
     }
 
-    updateState(shipmentId: string, newState: ShipmentState, changedAt: Date): Promise<void> {
-        throw new Error("Method not implemented.");
+    /**
+     * Busca Shipments que han cambiado desde una fecha específica.
+     * @param since - La fecha desde la cual buscar cambios.
+     * @returns Una promesa que resuelve con un array de Shipments que han cambiado desde la fecha indicada.
+     */
+    async findChangedSince(since: Date): Promise<{ id: string; state: ShipmentState }[]> {
+        const sinceUtc = new Date(since.getTime() + since.getTimezoneOffset() * 60000);
+        const conn = await this.pool.getConnection();
+        try {
+            const [rows] = await conn.query<RowDataPacket[]>(
+                `SELECT 
+                        id,
+                        current_state,
+                        changed_at
+                    FROM shipments
+                    WHERE changed_at > ?
+                    ORDER BY changed_at ASC`,
+                [sinceUtc]
+            );
+            return rows.map(shipmentFound => {
+                return { id: shipmentFound.id, state: shipmentFound.current_state as ShipmentState };
+            });
+        } finally {
+            conn.release();
+        }
     }
+
+    /**
+     * Actualiza el estado de un Shipment.
+     * @param shipmentId - El id del Shipment a actualizar.
+     * @param newState - El nuevo estado del Shipment.
+     * @param changedAt - La fecha y hora en que se cambió el estado.
+     * @returns Una promesa que se resuelve cuando el estado ha sido actualizado.
+     */
+    async updateState(shipmentId: string, newState: ShipmentState, changedAt: Date): Promise<void> {
+        const conn = await this.pool.getConnection();
+        try {
+
+            /*
+            * No se actualiza la tabla shipments, solo se inserta en el historial,
+            * esto para evitar que se actualice el campo changed_at automáticamente
+            * solo es para poder probar cambiando el estado del Shipment desde la DB
+            */
+
+            // Inserta el nuevo estado en el historial de estados del Shipment
+            await conn.query(
+                `INSERT INTO shipment_state_history (id, shipment_id, state, changed_at)
+                 VALUES (?, ?, ?, ?)`,
+                [uuid(), shipmentId, newState, changedAt]
+            );
+        } finally {
+            conn.release();
+        }
+    }
+
+    /**
+     * Crea un nuevo Shipment en la base de datos.
+     * @param shipment - El objeto Shipment a guardar.
+     * @returns Una promesa que se resuelve cuando el Shipment ha sido guardado.
+     */
+    async create(shipment: Shipment): Promise<void> {
+        const connection = await this.pool.getConnection();
+        try {
+            //Inserta el Shipment en la tabla shipments
+            const sqlInsertShipment = `
+                INSERT INTO shipments 
+                    (id, origin_id, destination_id, user_id, chargeable_weight, price, parcel_weight, parcel_length, parcel_width, parcel_height, current_state, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `;
+            await connection.execute(sqlInsertShipment, [
+                shipment.getId(),
+                shipment.getOriginId(),
+                shipment.getDestinationId(),
+                shipment.getUserId(),
+                shipment.getParcel().getChargeableWeight(),
+                shipment.getParcel().getPrice(),
+                shipment.getParcel().getWeight(),
+                shipment.getParcel().getLength(),
+                shipment.getParcel().getWidth(),
+                shipment.getParcel().getHeight(),
+                shipment.getState(),
+                new Date()
+            ]);
+            //Prepara los datos para insertar en la tabla shipment_state_history
+            const historyId = uuid();
+            const firstHistory = shipment.getStateHistory()[0];
+
+            // Inserta el primer estado del Shipment en la tabla shipment_state_history
+            const sql2 = `
+                INSERT INTO shipment_state_history
+                    (id, shipment_id, state, changed_at)
+                VALUES (?, ?, ?, ?)
+            `;
+            await connection.execute(sql2, [
+                historyId,
+                shipment.getId(),
+                firstHistory.state,
+                firstHistory.changedAt
+            ]);
+        } catch (err) {
+            console.error('Error al crear el Shipment:', err);
+            await connection.rollback();
+            throw new Error('Error al crear el envio, por favor intente nuevamente más tarde.');
+        } finally {
+            connection.release();
+        }
+
+
+    }
+
+
 }

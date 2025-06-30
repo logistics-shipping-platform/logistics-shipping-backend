@@ -1,12 +1,7 @@
-import { Shipment, ShipmentState } from "../../Shipment";
+import { Shipment, ShipmentState } from "../../model/shipment";
+
 
 export interface ShipmentRepositoryPort {
-  /**
-   * Crea un nuevo Shipment en el repositorio.
-   * @param shipment - El objeto Shipment a guardar.
-   * @returns Una promesa que se resuelve cuando el Shipment ha sido guardado.
-   */
-  create(shipment: Shipment): Promise<void>;
 
   /**
    * Busca un Shipment por su ID.
@@ -25,6 +20,13 @@ export interface ShipmentRepositoryPort {
   findAllByUserIdPaginated(userId: string, page: number, count: number): Promise<Shipment[]>;
 
   /**
+   * Busca los ids y estados de los Shipments que han cambiado desde una fecha específica.
+   * @param since - La fecha desde la cual buscar cambios.
+   * @returns Una promesa que resuelve con un array de objetos que contienen el id y el estado de los Shipments que han cambiado desde la fecha indicada.
+   */
+  findChangedSince(since: Date): Promise<{ id: string; state: ShipmentState }[]>;
+
+  /**
    * Actualiza el estado de un Shipment.
    * @param shipmentId - El id del Shipment a actualizar.
    * @param newState - El nuevo estado del Shipment.
@@ -32,4 +34,11 @@ export interface ShipmentRepositoryPort {
    * @returns Una promesa que se resuelve cuando el estado ha sido actualizado.
    */
   updateState(shipmentId: string, newState: ShipmentState, changedAt: Date): Promise<void>;
+
+  /**
+   * Crea un nuevo Shipment en el repositorio.
+   * @param shipment - El objeto Shipment a guardar.
+   * @returns Una promesa que se resuelve cuando el Shipment ha sido guardado.
+   */
+  create(shipment: Shipment): Promise<void>;
 }
