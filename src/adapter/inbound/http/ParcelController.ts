@@ -6,6 +6,12 @@ import { ParcelQuoteDTO } from './dto/ParcelQuoteDTO';
 export class ParcelController {
   constructor(private getParcelQuoteUC: GetParcelQuoteUseCase) { }
 
+  /**
+   * Obtiene la cotización de un paquete.
+   * @param req - Contiene la información de la solicitud.
+   * @param res - Respuesta que contiene el peso y precio del paquete.
+   * @returns {Promise<void>}
+   */
   getFareValue = async (req: Request, res: Response) => {
     try {
       const dto = new ParcelQuoteDTO(req.body);

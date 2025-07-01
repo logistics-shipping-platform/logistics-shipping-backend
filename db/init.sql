@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS shipments (
                         'CANCELLED'
                       ) NOT NULL,
   created_at          DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  changed_at          DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  changed_at          DATETIME      DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id)        REFERENCES users(id),
   FOREIGN KEY (origin_id)      REFERENCES cities(id),
   FOREIGN KEY (destination_id) REFERENCES cities(id)
