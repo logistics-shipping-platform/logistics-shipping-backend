@@ -178,9 +178,6 @@ export class MYSQLShipmentRepository implements ShipmentRepositoryPort {
                 [sinceUtc]
             );
 
-            if(rows.length > 0) {
-                console.log(`Found ${rows}`);
-            }
             return rows.map(shipmentFound => {
                 return { id: shipmentFound.id, state: shipmentFound.current_state as ShipmentState };
             });

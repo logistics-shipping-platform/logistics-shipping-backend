@@ -18,11 +18,9 @@ export class GetAllCitiesUseCase implements GetCitiesPort {
     // Primero, intenta obtener las ciudades desde la caché
     const cached = await this.cache.get<{ id: string, name: string }[]>(this.cacheKey);
     if (cached) {
-      console.log("Cities retrieved from cache");
       return cached;
     }
 
-    console.log("Cities retrieved from repository");
     // Si no están en caché, obtén las ciudades desde el repositorio
     const cities = await this.cityRepository.getCities();
 
