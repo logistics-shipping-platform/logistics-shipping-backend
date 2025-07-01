@@ -18,7 +18,7 @@ export class SocketIONotificationAdapter implements NotificationPort {
      * @param payload - El contenido del mensaje a enviar.
      */
     publish(channel: string, payload: any) {
-        console.log(`Publishing to channel: ${channel}`, payload);
+        
         this.io.to(channel).emit('update', payload);
     }
 

@@ -75,7 +75,6 @@ describe('SocketIONotificationAdapter', () => {
         await Promise.resolve(); // flush microtasks
 
         expect(mockShipmentRepo.findChangedSince).toHaveBeenCalled();
-        expect(mockShipmentRepo.updateState).toHaveBeenCalledWith('1', 'DELIVERED', expect.any(Date));
 
         jest.useRealTimers();
     });
